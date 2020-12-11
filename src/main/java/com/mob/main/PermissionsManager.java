@@ -21,8 +21,8 @@ public class PermissionsManager {
         }
     }
 
-    public User login (String username, String password) throws SQLException {
-        User user = db.getUser(username);
+    public User login (String id, String password) throws SQLException {
+        User user = db.getUser(id);
         if (user.getPassword().equals(password)) {
             return user;
         } else {

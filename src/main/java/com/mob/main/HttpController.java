@@ -41,7 +41,7 @@ public class HttpController {
 
     @ResponseBody
     @RequestMapping(path = "login", produces = "application/json", method = RequestMethod.GET)
-    String login(@RequestParam String username,
+    String login(@RequestParam String id,
                  @RequestParam String password,
                  final HttpServletRequest request) throws SQLException {
 
@@ -49,7 +49,7 @@ public class HttpController {
         if (!session.isNew()) session.invalidate();
         session = request.getSession();
         try {
-            User user = permissionsManager.login(username, password);
+            User user = permissionsManager.login(id, password);
             session.setAttribute("user", user);
         } catch (WrongUsernameOrPasswordException e) {
             session.invalidate();
@@ -73,12 +73,14 @@ public class HttpController {
                           @RequestParam String title,
                           @RequestParam String description,
                           @RequestParam long date,
-                          @RequestParam String author) throws SQLException {
+                          @RequestParam String author,
+                          HttpSession session) throws SQLException {
+        permissionsManager.checkSession(session);
         db.createProposal(community, title, description, new Date(date), author);
         return "success";
 
     }
-    
+
     @RequestMapping(value = "/doc", method = RequestMethod.GET)
     void doc(HttpServletResponse httpServletResponse) {
         httpServletResponse.setHeader("Location", "/doc/index.html");
