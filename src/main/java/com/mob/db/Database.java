@@ -1,6 +1,10 @@
 package com.mob.db;
 
 
+import com.mob.Exceptions.CommunityDoesntExistException;
+import com.mob.Exceptions.ProposalDoesntExistException;
+import com.mob.Exceptions.RowDoesntExistException;
+import com.mob.Exceptions.UserDoesntException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -57,6 +61,45 @@ public class Database {
         }
     }
 
+    public void addComment(String text, String author, int proposal) throws SQLException {
+        try (Connection conn = dataSource.getConnection()) {
+            checkProposal(conn, proposal);
+            checkUser(conn, author);
+            Comment comment = new Comment(text, author, proposal);
+            comment.putIntoDb(conn);
+        }
+    }
+
+    public void checkProposal(Connection conn, int proposalId) throws SQLException {
+        Object[] args = {proposalId};
+        PreparedStatement statement = SQLUtil.prepareStatement(conn.prepareStatement("select  count(*) from proposals where id = ?"), args);
+        ResultSet cursor = statement.executeQuery();
+        cursor.first();
+        if(!(cursor.getInt(0) > 0)){
+            throw new ProposalDoesntExistException("");
+        }
+    }
+
+    public void checkUser(Connection conn, String author) throws SQLException {
+        Object[] args = {author};
+        PreparedStatement statement = SQLUtil.prepareStatement(conn.prepareStatement("select  count(*) from proposals where id = ?"), args);
+        ResultSet cursor = statement.executeQuery();
+        cursor.first();
+        if(!(cursor.getInt(0) > 0)){
+           throw new UserDoesntException("");
+        }
+    }
+
+    public void checkCommunity(Connection conn, int communityId) throws SQLException {
+        Object[] args = {communityId};
+        PreparedStatement statement = SQLUtil.prepareStatement(conn.prepareStatement("select  count(*) from communities where id = ?"), args);
+        ResultSet cursor = statement.executeQuery();
+        cursor.first();
+        if(!(cursor.getInt(0) > 0)){
+            throw new CommunityDoesntExistException("");
+        }
+    }
+
     public User getUser(String id) throws SQLException {
         Object[] args = {id};
         try (Connection conn = dataSource.getConnection()) {
@@ -79,6 +122,8 @@ public class Database {
 
     public void createProposal(int community, String title, String description, Date date, String author) throws SQLException {
         try (Connection conn = dataSource.getConnection()) {
+            checkCommunity(conn, community);
+            checkUser(conn, author);
             Proposal proposal = new Proposal(community, title, description, date, author);
             proposal.putIntoDb(conn);
         }
@@ -94,6 +139,7 @@ public class Database {
             return l > 0;
         }
     }
+
 
     public Comment[] getComments(Proposal parentProposal) throws SQLException {
         Object[] args = {parentProposal.id};
@@ -113,6 +159,7 @@ public class Database {
         }
     }
 
+
     public Proposal getProposal(int proposalId) throws SQLException {
         Object[] args = {};
         try (Connection conn = dataSource.getConnection()) {
@@ -124,6 +171,42 @@ public class Database {
         }
     }
 
+    public Community[] getUserCommunities(String user) throws SQLException {
+        Object[] args = {user};
+        try (Connection conn = dataSource.getConnection()) {
+            checkUser(conn, user);
+            PreparedStatement statement = SQLUtil.prepareStatement(conn.prepareStatement("select * from community2users where \"user\" = ?;"), args);
+            ResultSet cursor = statement.executeQuery();
+            List<Community> communities = new ArrayList<>();
+            while(cursor.next()) {
+                Object[] args2 = {cursor.getInt("community")};
+                PreparedStatement statement2 = SQLUtil.prepareStatement(conn.prepareStatement("select * from community2users where \"user\" = ?;"), args2);
+                ResultSet cursor2 = statement2.executeQuery();
+                communities.add(new Community(cursor2));
+            }
+            return (Community[]) communities.toArray();
+        }
+    }
+
+    public void like(String user, int proposal) throws SQLException {
+        try (Connection conn = dataSource.getConnection()) {
+            checkProposal(conn, proposal);
+            checkUser(conn, user);
+            Object[] args = {user, proposal};
+            PreparedStatement statement = SQLUtil.prepareStatement(conn.prepareStatement("insert into liked2users(\"user\", proposal) values (?, ?)"), args);
+            statement.executeUpdate();
+        }
+    }
+
+    public void dislike(String user, int proposal) throws SQLException {
+        try (Connection conn = dataSource.getConnection()) {
+            checkProposal(conn, proposal);
+            checkUser(conn, user);
+            Object[] args = {user, proposal};
+            PreparedStatement statement = SQLUtil.prepareStatement(conn.prepareStatement("insert into disliked2users(\"user\", proposal) values (?, ?)"), args);
+            statement.executeUpdate();
+        }
+    }
 
     public Community[] getCommunities() throws SQLException {
         Object[] args = {};

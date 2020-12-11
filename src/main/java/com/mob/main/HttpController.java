@@ -2,9 +2,7 @@ package com.mob.main;
 
 
 import com.mob.Exceptions.*;
-import com.mob.db.Database;
-import com.mob.db.Proposal;
-import com.mob.db.User;
+import com.mob.db.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,28 +32,23 @@ public class HttpController {
     }
 
     @ResponseBody
-    @RequestMapping(path = "getProposals", produces = "application/json", method = RequestMethod.GET)
-    Proposal[] getProposals(@RequestParam int community) throws SQLException {
-        return db.getProposals(community);
-    }
-
-    @ResponseBody
     @RequestMapping(path = "login", produces = "application/json", method = RequestMethod.GET)
-    String login(@RequestParam String id,
-                 @RequestParam String password,
-                 final HttpServletRequest request) throws SQLException {
+    Community[] login(@RequestParam String id,
+                      @RequestParam String password,
+                      final HttpServletRequest request) throws SQLException {
 
         HttpSession session = request.getSession();
+        User user;
         if (!session.isNew()) session.invalidate();
         session = request.getSession();
         try {
-            User user = permissionsManager.login(id, password);
+            user = permissionsManager.login(id, password);
             session.setAttribute("user", user);
         } catch (WrongUsernameOrPasswordException e) {
             session.invalidate();
             throw e;
         }
-        return "success";
+        return db.getUserCommunities(user.getId());
     }
 
     @ResponseBody
@@ -78,7 +71,28 @@ public class HttpController {
         permissionsManager.checkSession(session);
         db.createProposal(community, title, description, new Date(date), author);
         return "success";
+    }
 
+    @ResponseBody
+    @RequestMapping(path = "getProposals", produces = "application/json", method = RequestMethod.GET)
+    Proposal[] getProposals(@RequestParam int community) throws SQLException {
+        Proposal[] proposals = db.getProposals(community);
+        for (int i = 0; i < proposals.length; i++) {
+            proposals[i] = proposals[i].convertToApiFormat(db);
+        }
+        return proposals;
+    }
+
+    @ResponseBody
+    @RequestMapping(path = "getComments", produces = "application/json", method = RequestMethod.GET)
+    Comment[] getComments(@RequestParam int proposalId,
+                          HttpSession session) throws SQLException {
+        permissionsManager.checkSession(session);
+        Comment[] comments = db.getComments(db.getProposal(proposalId));
+        for (int i = 0; i < comments.length; i++) {
+            comments[i] = comments[i].convertToApiFormat(db);
+        }
+        return comments;
     }
 
     @RequestMapping(value = "/doc", method = RequestMethod.GET)
@@ -86,5 +100,40 @@ public class HttpController {
         httpServletResponse.setHeader("Location", "/doc/index.html");
         httpServletResponse.setStatus(302);
     }
+
+    @ResponseBody
+    @RequestMapping(path = "addComment", produces = "application/json", method = RequestMethod.POST)
+    String addComment(@RequestParam String text,
+                      @RequestParam String author,
+                      @RequestParam int proposal,
+                      HttpSession session) throws SQLException {
+        permissionsManager.checkSession(session);
+        db.addComment(text, author, proposal);
+        return "success";
+
+    }
+
+    @ResponseBody
+    @RequestMapping(path = "like", produces = "application/json", method = RequestMethod.POST)
+    String like(@RequestParam String user,
+                @RequestParam int proposal,
+                HttpSession session) throws SQLException {
+        permissionsManager.checkSession(session);
+        db.like(user, proposal);
+        return "success";
+    }
+
+
+    @ResponseBody
+    @RequestMapping(path = "dislike", produces = "application/json", method = RequestMethod.POST)
+    String dislike(@RequestParam String user,
+                   @RequestParam int proposal,
+                   HttpSession session) throws SQLException {
+        permissionsManager.checkSession(session);
+        db.dislike(user, proposal);
+        return "success";
+
+    }
+
 
 }

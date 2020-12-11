@@ -1,5 +1,7 @@
 package com.mob.db;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -11,6 +13,7 @@ public class Proposal {
     int community;
     String title;
     String description;
+    @JsonFormat(shape = JsonFormat.Shape.NUMBER_INT)
     Date date;
     String authorId;
     int relevance;
