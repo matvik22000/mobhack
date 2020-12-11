@@ -3,16 +3,18 @@ package com.mob.db;
 
 import com.mob.Exceptions.CommunityDoesntExistException;
 import com.mob.Exceptions.ProposalDoesntExistException;
-import com.mob.Exceptions.RowDoesntExistException;
 import com.mob.Exceptions.UserDoesntException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.sql.DataSource;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Date;
+import java.util.List;
 
 @Component
 public class Database {
@@ -28,7 +30,7 @@ public class Database {
             while (cursor.next()) {
                 proposals.add(new Proposal(cursor));
             }
-            return (Proposal[]) proposals.toArray();
+            return proposals.toArray(new Proposal[0]);
         }
     }
 
@@ -155,15 +157,15 @@ public class Database {
                 Comment comment = new Comment(id, text, author, proposal, parentProposal);
                 comments.add(comment);
             }
-            return (Comment[]) comments.toArray();
+            return comments.toArray(new Comment[0]);
         }
     }
 
 
     public Proposal getProposal(int proposalId) throws SQLException {
-        Object[] args = {};
+        Object[] args = {proposalId};
         try (Connection conn = dataSource.getConnection()) {
-            PreparedStatement statement = SQLUtil.prepareStatement(conn.prepareStatement(""), args);
+            PreparedStatement statement = SQLUtil.prepareStatement(conn.prepareStatement("select * from proposals where id == ?;"), args);
             ResultSet cursor = statement.executeQuery();
             cursor.next();
             return new Proposal(cursor);
@@ -184,7 +186,7 @@ public class Database {
                 ResultSet cursor2 = statement2.executeQuery();
                 communities.add(new Community(cursor2));
             }
-            return (Community[]) communities.toArray();
+            return communities.toArray(new Community[0]);
         }
     }
 
@@ -217,7 +219,7 @@ public class Database {
             while (cursor.next()) {
                 communities.add(new Community(cursor));
             }
-            return (Community[]) communities.toArray();
+            return communities.toArray(new Community[0]);
         }
     }
 
