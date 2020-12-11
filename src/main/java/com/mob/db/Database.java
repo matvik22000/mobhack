@@ -82,7 +82,7 @@ public class Database {
 
     public void checkUser(Connection conn, String author) throws SQLException {
         Object[] args = {author};
-        PreparedStatement statement = SQLUtil.prepareStatement(conn.prepareStatement("select  count(*) from proposals where id = ?"), args);
+        PreparedStatement statement = SQLUtil.prepareStatement(conn.prepareStatement("select  count(*) from users where id = ?"), args);
         ResultSet cursor = statement.executeQuery();
         cursor.next();
         if(!(cursor.getInt(0) > 0)){
