@@ -38,12 +38,12 @@ public class Database {
         try (Connection conn = dataSource.getConnection()) {
             PreparedStatement statement = SQLUtil.prepareStatement(conn.prepareStatement("select count(*) from liked2users where proposal = ?"), args);
             ResultSet cursor = statement.executeQuery();
-            cursor.first();
+            cursor.next();
             int likes = cursor.getInt(0);
 
             statement = SQLUtil.prepareStatement(conn.prepareStatement("select count(*) from disliked2users where proposal = ?"), args);
             cursor = statement.executeQuery();
-            cursor.first();
+            cursor.next();
             int dislikes = cursor.getInt(0);
 
             return likes - dislikes;
@@ -56,7 +56,7 @@ public class Database {
         try (Connection conn = dataSource.getConnection()) {
             PreparedStatement statement = SQLUtil.prepareStatement(conn.prepareStatement("select count(*) from comments where proposal = ?"), args);
             ResultSet cursor = statement.executeQuery();
-            cursor.first();
+            cursor.next();
             return cursor.getInt(0);
         }
     }
@@ -74,7 +74,7 @@ public class Database {
         Object[] args = {proposalId};
         PreparedStatement statement = SQLUtil.prepareStatement(conn.prepareStatement("select  count(*) from proposals where id = ?"), args);
         ResultSet cursor = statement.executeQuery();
-        cursor.first();
+        cursor.next();
         if(!(cursor.getInt(0) > 0)){
             throw new ProposalDoesntExistException("");
         }
@@ -84,7 +84,7 @@ public class Database {
         Object[] args = {author};
         PreparedStatement statement = SQLUtil.prepareStatement(conn.prepareStatement("select  count(*) from proposals where id = ?"), args);
         ResultSet cursor = statement.executeQuery();
-        cursor.first();
+        cursor.next();
         if(!(cursor.getInt(0) > 0)){
            throw new UserDoesntException("");
         }
@@ -94,7 +94,7 @@ public class Database {
         Object[] args = {communityId};
         PreparedStatement statement = SQLUtil.prepareStatement(conn.prepareStatement("select  count(*) from communities where id = ?"), args);
         ResultSet cursor = statement.executeQuery();
-        cursor.first();
+        cursor.next();
         if(!(cursor.getInt(0) > 0)){
             throw new CommunityDoesntExistException("");
         }
@@ -105,7 +105,7 @@ public class Database {
         try (Connection conn = dataSource.getConnection()) {
             PreparedStatement statement = SQLUtil.prepareStatement(conn.prepareStatement("select * from users where id = ?"), args);
             ResultSet cursor = statement.executeQuery();
-            cursor.first();
+            cursor.next();
             String username = cursor.getString("username");
             String password = cursor.getString("password");
             return new User(id, username, password);
@@ -134,7 +134,7 @@ public class Database {
         try (Connection conn = dataSource.getConnection()) {
             PreparedStatement statement = SQLUtil.prepareStatement(conn.prepareStatement("select count(*) from liked2users where \"user\" = ? and proposal = ?;"), args);
             ResultSet cursor = statement.executeQuery();
-            cursor.first();
+            cursor.next();
             int l = cursor.getInt(0);
             return l > 0;
         }
@@ -165,7 +165,7 @@ public class Database {
         try (Connection conn = dataSource.getConnection()) {
             PreparedStatement statement = SQLUtil.prepareStatement(conn.prepareStatement(""), args);
             ResultSet cursor = statement.executeQuery();
-            cursor.first();
+            cursor.next();
             return new Proposal(cursor);
 
         }
