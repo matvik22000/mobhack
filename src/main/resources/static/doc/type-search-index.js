@@ -1,0 +1,1 @@
+typeSearchIndex = [{"p":"com.mob.Exceptions","l":"AuthorisationException"},{"p":"com.mob.db","l":"Comment"},{"p":"com.mob.db","l":"Community"},{"p":"com.mob.main","l":"HttpController"},{"p":"com.mob.db","l":"Proposal"},{"p":"com.mob.db","l":"User"},{"p":"com.mob.Exceptions","l":"WrongUsernameOrPasswordException"}]
