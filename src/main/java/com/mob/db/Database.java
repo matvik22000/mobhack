@@ -75,7 +75,7 @@ public class Database {
         PreparedStatement statement = SQLUtil.prepareStatement(conn.prepareStatement("select  count(*) from proposals where id = ?"), args);
         ResultSet cursor = statement.executeQuery();
         cursor.next();
-        if(!(cursor.getInt(0) > 0)){
+        if(!(cursor.getInt(1) > 0)){
             throw new ProposalDoesntExistException("");
         }
     }
@@ -85,7 +85,7 @@ public class Database {
         PreparedStatement statement = SQLUtil.prepareStatement(conn.prepareStatement("select  count(*) from users where id = ?"), args);
         ResultSet cursor = statement.executeQuery();
         cursor.next();
-        if(!(cursor.getInt(0) > 0)){
+        if(!(cursor.getInt(1) > 0)){
            throw new UserDoesntException("");
         }
     }
@@ -95,7 +95,7 @@ public class Database {
         PreparedStatement statement = SQLUtil.prepareStatement(conn.prepareStatement("select  count(*) from communities where id = ?"), args);
         ResultSet cursor = statement.executeQuery();
         cursor.next();
-        if(!(cursor.getInt(0) > 0)){
+        if(!(cursor.getInt(1) > 0)){
             throw new CommunityDoesntExistException("");
         }
     }
