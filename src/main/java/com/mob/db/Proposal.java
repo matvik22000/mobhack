@@ -38,16 +38,16 @@ public class Proposal {
         this.authorId = authorId;
     }
 
-    public Proposal convertToApiFormat(Database db) throws SQLException {
+    public Proposal convertToApiFormat(Database db, String user) throws SQLException {
         relevance = db.getRelevance(id);
         comments = db.countComments(id);
         author = db.getUser(authorId);
-        userLiked = db.likedByUser(authorId, id);
+        userLiked = db.likedByUser(user, id);
         return this;
     }
     public Proposal(ResultSet cursor) throws SQLException {
         id = cursor.getInt("id");
-        community = cursor.getInt("id");
+        community = cursor.getInt("community");
         title = cursor.getString("title");
         description = cursor.getString("description");
         date = cursor.getTimestamp("date");

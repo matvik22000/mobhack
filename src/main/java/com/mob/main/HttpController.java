@@ -20,7 +20,7 @@ import java.sql.SQLException;
 public class HttpController {
     private static final Log log = LogFactory.getLog(HttpController.class);
     @Autowired
-    private Database db;
+    Database db;
 
     @Autowired
     private PermissionsManager permissionsManager;
@@ -75,10 +75,13 @@ public class HttpController {
 
     @ResponseBody
     @RequestMapping(path = "getProposals", produces = "application/json", method = RequestMethod.GET)
-    Proposal[] getProposals(@RequestParam int community) throws SQLException {
+    Proposal[] getProposals(@RequestParam int community,
+                            HttpSession session) throws SQLException {
+        permissionsManager.checkSession(session);
+        User user = (User) session.getAttribute("user");
         Proposal[] proposals = db.getProposals(community);
         for (int i = 0; i < proposals.length; i++) {
-            proposals[i] = proposals[i].convertToApiFormat(db);
+            proposals[i] = proposals[i].convertToApiFormat(db, user.getId());
         }
         return proposals;
     }
@@ -115,22 +118,24 @@ public class HttpController {
 
     @ResponseBody
     @RequestMapping(path = "like", produces = "application/json", method = RequestMethod.POST)
-    String like(@RequestParam String user,
-                @RequestParam int proposal,
-                HttpSession session) throws SQLException {
+    String like(
+            @RequestParam int proposal,
+            HttpSession session) throws SQLException {
         permissionsManager.checkSession(session);
-        db.like(user, proposal);
+        User user = (User) session.getAttribute("user");
+        db.like(user.getId(), proposal);
         return "success";
     }
 
 
     @ResponseBody
     @RequestMapping(path = "dislike", produces = "application/json", method = RequestMethod.POST)
-    String dislike(@RequestParam String user,
-                   @RequestParam int proposal,
-                   HttpSession session) throws SQLException {
+    String dislike(
+            @RequestParam int proposal,
+            HttpSession session) throws SQLException {
         permissionsManager.checkSession(session);
-        db.dislike(user, proposal);
+        User user = (User) session.getAttribute("user");
+        db.dislike(user.getId(), proposal);
         return "success";
 
     }

@@ -42,12 +42,12 @@ public class Database {
             PreparedStatement statement = SQLUtil.prepareStatement(conn.prepareStatement("select count(*) from liked2users where proposal = ?"), args);
             ResultSet cursor = statement.executeQuery();
             cursor.next();
-            int likes = cursor.getInt(0);
+            int likes = cursor.getInt(1);
 
             statement = SQLUtil.prepareStatement(conn.prepareStatement("select count(*) from disliked2users where proposal = ?"), args);
             cursor = statement.executeQuery();
             cursor.next();
-            int dislikes = cursor.getInt(0);
+            int dislikes = cursor.getInt(1);
 
             return likes - dislikes;
 
@@ -60,7 +60,7 @@ public class Database {
             PreparedStatement statement = SQLUtil.prepareStatement(conn.prepareStatement("select count(*) from comments where proposal = ?"), args);
             ResultSet cursor = statement.executeQuery();
             cursor.next();
-            return cursor.getInt(0);
+            return cursor.getInt(1);
         }
     }
 
@@ -143,7 +143,7 @@ public class Database {
             PreparedStatement statement = SQLUtil.prepareStatement(conn.prepareStatement("select count(*) from liked2users where \"user\" = ? and proposal = ?;"), args);
             ResultSet cursor = statement.executeQuery();
             cursor.next();
-            int l = cursor.getInt(0);
+            int l = cursor.getInt(1);
             return l > 0;
         }
     }
