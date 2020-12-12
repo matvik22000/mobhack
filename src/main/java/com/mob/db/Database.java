@@ -4,6 +4,7 @@ package com.mob.db;
 import com.mob.Exceptions.CommunityDoesntExistException;
 import com.mob.Exceptions.ProposalDoesntExistException;
 import com.mob.Exceptions.UserDoesntException;
+import com.mob.Exceptions.WrongUsernameOrPasswordException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -105,6 +106,11 @@ public class Database {
     public User getUser(String id) throws SQLException {
         Object[] args = {id};
         try (Connection conn = dataSource.getConnection()) {
+            try {
+                checkUser(conn, id);
+            } catch (UserDoesntException e) {
+                throw new WrongUsernameOrPasswordException("");
+            }
             PreparedStatement statement = SQLUtil.prepareStatement(conn.prepareStatement("select * from users where id = ?"), args);
             ResultSet cursor = statement.executeQuery();
             cursor.next();
